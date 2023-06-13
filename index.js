@@ -1,7 +1,9 @@
 // Import de Express (doc express)
 const express = require('express');
 const app = express();
+const { User } = require('./db/mongo');
 const cors= require('cors');
+const bcrypt = require('bcrypt');
 
 // Définition du port utilisé par l'environnement du serveur OU 4000
 const PORT = (process.env.PORT || 4000);
@@ -25,57 +27,70 @@ app.listen(PORT, function () {
     console.log(`Server is running on: ${PORT}`);
 })
 
-const users = [];
+
+
+
 
 // Middleware pour s'inscrire
-function signUp(req, res, next) {
-    const body = req.body;
-    console.log('body', body);
+async function signUp(req, res, next) {
     const email = req.body.email;
     const password = req.body.password;
 
     
-    const userInDb = users.find(user => user.email === email);
-    console.log('userInDb', userInDb);
+    const userInDb = await User.findOne({
+        email: email
+        });
     if (userInDb != null) {
         res.status(400).send('Email already exists');
         return;
     }
     const user = {
         email: email,
-        password: password
+        password: hashPassword(password)
     };
-    users.push(user);
+    try {
+        await User.create(user);
+    } catch (e) {
+        console.error(e);
+        res.status(500).send("Something went wrong");
+        return;
+    }
     res.send('Sign up');
     next();
 }
 
-// Middleware pour se connecter
-function login(req, res, next) {
-    const body = req.body;
-    console.log('body', body);
-    console.log('users in db :', users);
 
-    const userInDb = users.find(user => user.email === email);
+
+
+// Middleware pour se connecter
+async function login(req, res, next) {
+    const body = req.body;
+    
+    const userInDb = await User.findOne({
+        email: body.email
+    });
     if (userInDb == null) {
         res.status(401).send('Wrong credentials');
         return;
     }
     const passwordInDb = userInDb.password;
-    if (passwordInDb != body.password) {
-        res.status(401).send('Wrong credentials');
+    if (!isPasswordCorrect(req.body.password, passwordInDb)) {
+        res.status(401).send('Wrong password');
+        return;
     }
 
-    if (body.email != 'anthonyruvoen@gmail.com') {
-        res.status(401).send('Wrong credentials');
-        return;
-    }
-    if (body.password != '123') {
-        res.status(401).send('Wrong credentials');
-        return;
-    }
     res.send({
-        userId: '123',
+        userId: userInDb._id,
         token: 'token'
     });
+}
+
+function hashPassword(password) {
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(password, salt);
+    return hash;
+}
+
+function isPasswordCorrect(password, hash) {
+    return bcrypt.compareSync(password, hash);
 }
