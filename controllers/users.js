@@ -72,7 +72,7 @@ function isPasswordCorrect(password, hash) {
 
 const usersRouter = express.Router();
 
-// Poster ou obtenir des données sur le endpoint donné
+// Envoyer des données sur le endpoint donné
 usersRouter.post('/signup', signUp)
 usersRouter.post('/login', login)
 

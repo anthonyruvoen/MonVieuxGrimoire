@@ -1,6 +1,6 @@
 const { app } = require('./config/app');
-const { usersRouter } = require('./controllers/users.controller');
-const { booksRouter } = require('./controllers/books.controller');
+const { usersRouter } = require('./controllers/users');
+const { booksRouter } = require('./controllers/books');
 
 
 // Récupérer des données à la racine (doc express)
