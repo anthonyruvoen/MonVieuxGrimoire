@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jsonwebtoken = require('jsonwebtoken');
 const { User } = require('../models/User');
 const express = require('express');
 
@@ -49,8 +50,18 @@ async function login(req, res, next) {
 
     res.send({
         userId: userInDb._id,
-        token: 'token'
+        token: Token(userInDb._id)
     });
+}
+
+function Token(id) {
+    const payload = {
+    userId: id
+    };
+    const token = jsonwebtoken.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: '24h'
+    });
+    return token;
 }
 // fonction pour crypter les mdp
 function hashPassword(password) {
