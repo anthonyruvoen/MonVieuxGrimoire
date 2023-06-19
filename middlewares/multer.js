@@ -1,14 +1,16 @@
 const multer = require('multer');
+const sharpMulter = require('sharp-multer');
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, "uploads");
-    },
-    filename: function (req, file, cb) {
-        const fileName = file.originalname.toLowerCase() + Date.now() + ".jpg";
-        cb(null, Date.now() + "-" + fileName);
-    }
-});
+
+const storage = sharpMulter ({
+                destination:(callback) =>callback(null, "uploads"),
+                imageOptions:{
+                useTimestamp: true,
+                fileFormat: "webp",
+                quality: 80,
+                }
+           });
+
 const upload = multer({
     storage: storage
 });
