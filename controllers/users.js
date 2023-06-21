@@ -2,24 +2,31 @@ const bcrypt = require('bcrypt');
 const jsonwebtoken = require('jsonwebtoken');
 const { User } = require('../models/User');
 const express = require('express');
+const usersRouter = express.Router();
 
-
+// Envoyer des données sur le endpoint donné
+usersRouter.post('/signup', signUp)
+usersRouter.post('/login', login)
 
 // fonction pour s'inscrire
-async function signUp(req, res, next) {
+async function signUp(req, res) {
     const email = req.body.email;
     const password = req.body.password;
+    if (email == null || password == null) {
+        res.status(400).send('email et mot de passe requis');
+        return;
+    }
     try {
-        const userInDb = await User.findOne({
+        const checkUserInDb = await User.findOne({
             email: email
             });
-        if (userInDb != null) {
+        if (checkUserInDb != null) {
             res.status(400).send('Email already exists');
             return;
         }
         const user = {
             email: email,
-            password: hashPassword(password)
+            password: hashPwd(password)
         };
         await User.create(user);
         res.send('Sign up');
@@ -28,11 +35,10 @@ async function signUp(req, res, next) {
         res.status(500).send("Something went wrong");
         return;
     }
-    next();
 }
 
 // fonction pour se connecter
-async function login(req, res, next) {
+async function login(req, res) {
     const body = req.body;
     if (body.email == null || body.password == null) {
         res.status(400).send("email et mot de passe requis");
@@ -40,22 +46,22 @@ async function login(req, res, next) {
     }
     try {
 
-        const userInDb = await User.findOne({
+        const checkUserInDb = await User.findOne({
             email: body.email
         });
-        if (userInDb == null) {
+        if (checkUserInDb == null) {
             res.status(401).send('Mauvaises informations de connexion');
             return;
         }
-        const passwordInDb = userInDb.password;
+        const passwordInDb = checkUserInDb.password;
         if (!isPasswordCorrect(req.body.password, passwordInDb)) {
             res.status(401).send('Mauvaises informations de connexion');
             return;
         }
         
         res.send({
-            userId: userInDb._id,
-            token: Token(userInDb._id)
+            userId: checkUserInDb._id,
+            token: Token(checkUserInDb._id)
         });
     } catch (e) {
         console.error(e);
@@ -63,6 +69,7 @@ async function login(req, res, next) {
     }
 }
 
+// Génération du token
 function Token(id) {
     const payload = {
     userId: id
@@ -73,13 +80,13 @@ function Token(id) {
     return token;
 }
 // fonction pour crypter les mdp
-function hashPassword(password) {
+function hashPwd(password) {
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(password, salt);
     return hash;
 }
 
-// fonction qui contrôle le mdp
+// fonction qui vérifie le mdp
 function isPasswordCorrect(password, hash) {
     return bcrypt.compareSync(password, hash);
 }
@@ -90,10 +97,7 @@ function isPasswordCorrect(password, hash) {
 //     console.log("deleted all users");
 // });
 
-const usersRouter = express.Router();
 
-// Envoyer des données sur le endpoint donné
-usersRouter.post('/signup', signUp)
-usersRouter.post('/login', login)
+
 
 module.exports = { usersRouter };
