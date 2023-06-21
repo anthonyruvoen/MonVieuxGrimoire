@@ -97,7 +97,4 @@ function isPasswordCorrect(password, hash) {
 //     console.log("deleted all users");
 // });
 
-
-
-
 module.exports = { usersRouter };
