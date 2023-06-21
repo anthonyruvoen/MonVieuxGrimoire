@@ -7,7 +7,7 @@ require("./../db/mongo.js");
 
 app.use(cors());
 app.use(express.json());
-app.use(`/${process.env.IMAGES_FOLDER}`, express.static("uploads"));
+app.use(`/${process.env.IMAGES_PUBLIC_URL}`, express.static("uploads"));
 
 
 

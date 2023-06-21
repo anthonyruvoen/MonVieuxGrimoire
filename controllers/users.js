@@ -9,49 +9,58 @@ const express = require('express');
 async function signUp(req, res, next) {
     const email = req.body.email;
     const password = req.body.password;
-    const userInDb = await User.findOne({
-        email: email
-        });
-    if (userInDb != null) {
-        res.status(400).send('Email already exists');
-        return;
-    }
-    const user = {
-        email: email,
-        password: hashPassword(password)
-    };
     try {
+        const userInDb = await User.findOne({
+            email: email
+            });
+        if (userInDb != null) {
+            res.status(400).send('Email already exists');
+            return;
+        }
+        const user = {
+            email: email,
+            password: hashPassword(password)
+        };
         await User.create(user);
+        res.send('Sign up');
     } catch (e) {
         console.error(e);
         res.status(500).send("Something went wrong");
         return;
     }
-    res.send('Sign up');
     next();
 }
 
 // fonction pour se connecter
 async function login(req, res, next) {
     const body = req.body;
-    
-    const userInDb = await User.findOne({
-        email: body.email
-    });
-    if (userInDb == null) {
-        res.status(401).send('Wrong credentials');
+    if (body.email == null || body.password == null) {
+        res.status(400).send("email et mot de passe requis");
         return;
     }
-    const passwordInDb = userInDb.password;
-    if (!isPasswordCorrect(req.body.password, passwordInDb)) {
-        res.status(401).send('Wrong password');
-        return;
-    }
+    try {
 
-    res.send({
-        userId: userInDb._id,
-        token: Token(userInDb._id)
-    });
+        const userInDb = await User.findOne({
+            email: body.email
+        });
+        if (userInDb == null) {
+            res.status(401).send('Mauvaises informations de connexion');
+            return;
+        }
+        const passwordInDb = userInDb.password;
+        if (!isPasswordCorrect(req.body.password, passwordInDb)) {
+            res.status(401).send('Mauvaises informations de connexion');
+            return;
+        }
+        
+        res.send({
+            userId: userInDb._id,
+            token: Token(userInDb._id)
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(500).send ('erreur:' + e.message)
+    }
 }
 
 function Token(id) {

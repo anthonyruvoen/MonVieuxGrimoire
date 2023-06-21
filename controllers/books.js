@@ -17,12 +17,11 @@ async function evalBook (req, res) {
         const id = req.params.id;
         if (id == null || id == "undefined") {
             res.status(400).send('id introuvable');
-        return;
-            }
+            return;
+        }
         const rating = req.body.rating;
         const userId = req.tokenPayload.userId;
         try {
-
             const book = await Book.findById(id);
             if (book == null) {
                 res.status(404).send('Livre non trouvé');
@@ -39,7 +38,7 @@ async function evalBook (req, res) {
             ratingsInDb.push(newRating);
             book.averageRating = calcAverageRating(ratingsInDb);
             await book.save();
-            res.status(200).json('Note envoyée');
+            res.status(200).json(book);
         } catch (e) {
             console.error(e);
             res.status(500).send('Erreur:' + e.message);
@@ -196,6 +195,10 @@ async function postBook(req, res) {
 
 
 
+// refresh apres note
+// function refresh(req, res) {
+//     res.redirect(req.get('/'));
+// };
 
 
 
@@ -203,16 +206,22 @@ async function postBook(req, res) {
 
 // fonction pour récupérer les livres 
 async function getBooks(req, res) {
-    const books = await Book.find();
-    books.forEach((book) => {
-        book.imageUrl = getImagePath(book.imageUrl);
-    });
-    res.send(books);
+    try {
+
+        const books = await Book.find();
+        books.forEach((book) => {
+            book.imageUrl = getImagePath(book.imageUrl);
+        });
+        res.send(books);
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('erreur:' + e.message);
+    }
 }
 
 // Récupérer l'url des images
 function getImagePath(fileName) {
-    return `${process.env.PUBLIC_URL}/${process.env.IMAGES_FOLDER}/`+fileName;
+    return `${process.env.PUBLIC_URL}/${process.env.IMAGES_PUBLIC_URL}/`+fileName;
 }
 
 

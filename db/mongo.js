@@ -6,7 +6,7 @@ const DB_URL = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@
 async function connect() {
     try {
         await mongoose.connect(DB_URL);
-        console.log("Connected to DB");
+        console.log("Connexion base de donnée OK");
     } catch (e) {
         console.error(e);
     }
