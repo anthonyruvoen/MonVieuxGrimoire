@@ -8,3 +8,5 @@ Faites la commande npm install pour installer les dépendances puis npm start po
 Lancer le Back-End :
 
 npm run dev après avoir installé nodemon ou npm start.
+
+Les variables d'environnement se trouvent dans le fichier .env.example

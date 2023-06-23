@@ -91,10 +91,4 @@ function isPasswordCorrect(password, hash) {
     return bcrypt.compareSync(password, hash);
 }
 
-
-// Fonction pour supprimer tous les users de la BDD
-// User.deleteMany({}).then(() =>  {
-//     console.log("deleted all users");
-// });
-
 module.exports = { usersRouter };

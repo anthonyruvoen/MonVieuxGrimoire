@@ -200,12 +200,4 @@ function getImagePath(fileName) {
     return `${process.env.PUBLIC_URL}/${process.env.IMAGES_PUBLIC_URL}/`+fileName;
 }
 
-
-
-
-// Fonction pour supprimer tous les livres de la BDD
-// Book.deleteMany({}).then(() => {
-//     console.log("books deleted");
-// });
-
 module.exports = { booksRouter };
