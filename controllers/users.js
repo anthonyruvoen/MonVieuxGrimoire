@@ -12,7 +12,7 @@ usersRouter.post('/login', login)
 async function signUp(req, res) {
     const email = req.body.email;
     const password = req.body.password;
-    if (email == null || password == null) {
+    if (email == null || password == "") {
         res.status(400).send('email et mot de passe requis');
         return;
     }
